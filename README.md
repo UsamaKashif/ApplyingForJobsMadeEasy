@@ -1,15 +1,18 @@
 # Applying for jobs made easy
 
 ## How it works
-1. Creating a JSON file of companies and their emails from comapnies.csv and Software-Hoises.xlsx.
+1. Creating a JSON file of companies and their emails from comapnies.csv and Software-Houses.xlsx.
 2. Reading the JSON file and sending the emails to comapnies according to constraints set.
 
 ## Installation
 1. Clone the repository
 2. cd (Change Directory) into the directory
-3. Create the virtual environment       
-    - `python -m venv venv`
-    - `venv\Scripts\activate`
+3. Create the virtual environment 
+    - `python -m venv env`
+    - Activate environment
+    - `env\Scripts\activate`
+    - Deactivate environment
+    - `deactivate`
 4. Install the requirements `pip install -r requirements.txt`
 
 ## Why Virtual Environment?
