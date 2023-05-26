@@ -1,19 +1,23 @@
-import email, smtplib, ssl
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import time
+import re
 
-# EAMIL SETUP
-sender_email = "<youremail@gmail.com>"
-password = "<yourpassword>"
 
+regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'  
+def check_email_valid(email):   
+    if(re.search(regex,email)):
+        return True  
+    else:
+        return False
 
 # if your cv name is not c.pdf then change the filename parameter
-def send_email(subject, receiver_email, body, filename="cv.pdf"):
+def send_email(sender_email, subject, receiver_email, body, filename="cv.pdf"):
+    if not check_email_valid(receiver_email):
+        print("Invalid sender email:", receiver_email)
+        return
     try:
-        time.sleep(20)
         # Create a multipart message and set headers
         message = MIMEMultipart()
         message["From"] = sender_email
@@ -38,11 +42,8 @@ def send_email(subject, receiver_email, body, filename="cv.pdf"):
         # Add attachment to message and convert message to string
         message.attach(part)
         text = message.as_string()
-        # Log in to server using secure context and send email
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-            server.login(sender_email, password)
-            server.sendmail(sender_email, receiver_email, text)
-        print("Email sent to:", receiver_email)
     except Exception as e:
-        print("Problem sending email to:", receiver_email)
+        print("prolem creating the Message", e)
+        exit()
+
+    return text

@@ -36,15 +36,21 @@ Virtual environment is used to create an isolated environment for the project. I
 4. Scroll down to App passwords and click on it
 5. Select app as other
 6. Enter the name of the app as you wish and click on generate
-7. Copy the password and paste it in the password variable in sendmail.py file
+7. Copy the password and paste it in the PASSWORD variable in main.py file
 
 ## Before running the program
-1. Add your email and password in sendmail.py file
+1. Add your email and password in main.py file
+    - `SENDER_EMAIL`
+    - `PASSWORD`
 2. Add your coverletter in coverletter.py
 3. Add your cv in the root directory of the project
 4. Make sure the name of the cv is cv.pdf
 
 ## Run the program
+Make sure your virtual environment is activated
+#### Activate virtual environment
+`env\Scripts\activate`
+(env) will appear in the terminal if the virtual environment is activated
 1. Run the program `python main.py`
 2. Follow the instructions
 3. Program will ask to select the mode (test/live)

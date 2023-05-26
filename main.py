@@ -11,11 +11,9 @@ Don't forget to star the repo if you like it.
 
 '''
 
-
-
-import pandas as pd
+import email, smtplib, ssl
+from helperfunctions import read_from_csv, read_from_xlsx, actual_email,emails_sent_to_json,test_email, update_companies_json, mode_selection, number_of_emails_to_send, get_name, get_subject, get_date
 from coverletter import CoverLetter
-from sendemail import send_email
 import time
 import json
 
@@ -29,17 +27,10 @@ def generate_companies_json ():
     except:
         print("Generating companies json file...")
         # loading the companies from csv files
-        companies = pd.read_csv('companies.csv')
-        companies = companies.loc[:, ["name", "email", "website"]]
-        companies = companies.dropna(subset=['email'])
-        companies["website"] = companies["website"].fillna("")
+        companies = read_from_csv("companies.csv")
 
         # loading the software houses from excel files
-        software_houses = pd.read_excel('Software-Houses.xlsx')
-        software_houses.columns = ['company', 'website', 'email', ""]
-        software_houses = software_houses.loc[:, ["company", "email", "website"]]
-        software_houses = software_houses.dropna(subset=['email'])
-        software_houses["website"] = software_houses["website"].fillna("")
+        software_houses = read_from_xlsx("Software-Houses.xlsx")
         COMPANIES = {}
         # creating a dictionary of companies
         for index, row in companies.iterrows():
@@ -71,52 +62,22 @@ def generate_companies_json ():
             json.dump(COMPANIES, file)
     return COMPANIES
 
-# Storing the emails sent to json file
-def emails_sent_to_json(companies):
-    file_path = "emails_sent_to.json"
-    # check if already existes then update the json file else create new
-    try:
-        with open(file_path, "r") as file:
-            emails_sent_to_json = json.load(file)
-        for key, value in companies.items():
-            emails_sent_to_json[key] = value
-    except:
-        emails_sent_to_json = companies
-    # Write the dictionary to a JSON file
-    with open(file_path, "w") as file:
-        json.dump(emails_sent_to_json, file)
 
-# test email function
-def test_email(subject, test_email, coverletter):
-    send_email(subject=subject, receiver_email=test_email, body=coverletter)
+# EAMIL SETUP
+SENDER_EMAIL = "<youreamil@gmail.com>"
+PASSWORD = "<yourpassword>"
 
-# actual email function
-def actual_email(subject, emails, coverletter):
-    for email in emails:
-        send_email(subject=subject, receiver_email=email, body=coverletter)
-        
-
-def update_companies_json(emails_sent_to, COMPANIES):
-    for key, value in emails_sent_to.items():
-        del COMPANIES[key]
-    file_path = "companies.json"
-    # Write the dictionary to a JSON file
-    with open(file_path, "w") as file:
-        json.dump(COMPANIES, file)
 
 if __name__ == "__main__":
+    if SENDER_EMAIL == "<youreamil@gmail.com>" or PASSWORD == "<yourpassword>":
+        print("Please change the SENDER_EMAIL and PASSWORD in main.py file")
+        exit()
     COMPANIES=generate_companies_json()
     print("\033[H\033[J")
 
     print("Welcome to the email sender program")
-    print("Email Modes: (test / live)")
-    print("Test mode will send emails to your email address")
-    print("Live mode will send emails to the companies")
-    mode = input("Select mode (test/live): ")
-    modes = ["test", "live"]
-    while mode not in modes:
-        print("Invalid mode")
-        mode = input("Select mode (test/live): ")
+    
+    mode = mode_selection()
     
     # clear the console
     print("\033[H\033[J")
@@ -124,62 +85,64 @@ if __name__ == "__main__":
     if mode == "test":
         testing_email = input("Enter test email address: ")
     
-    try:
-        number_of_emails = int(input("How many emails do you want to send? (max 50) "))
-        while number_of_emails > 50:
-            print("You can only send 50 emails at a time")
-            number_of_emails = int(input("How many emails do you want to send? (max 50) "))
-    except:
-        print("Please enter a number")
-        exit()
     
+    number_of_emails = number_of_emails_to_send()
     # clear the console
     print("\033[H\033[J")
-    date = input("Enter date for the cover letter (May 24, 2023): ")
-    while date == "":
-        print("Date cannot be empty")
-        date = input("Enter date for the cover letter (May 24, 2023): ")
-    name = input("Enter your name for the cover letter (Usama Kashif): ")
-    while name == "":
-        print("Name cannot be empty")
-        name = input("Enter your name for the cover letter (Usama Kashif): ")
-    subject = input("Enter subject for the email: ")
-    while subject == "":
-        print("Subject cannot be empty")
-        subject = input("Enter subject for the email: ")
+    
+    date = get_date()
+    name = get_name()
+    subject = get_subject()
+
     # clear the console
     print("\033[H\033[J")
 
-    emails_sent_to = {}
-    i = 1
-    for key, value in COMPANIES.items():
-        company_name = key
-        emails = value["emails"]
-        website = value["website"]
-        coverletter = CoverLetter(company_name, date=date, name=name)
-        time.sleep(2)
-        print(f'Email: {i}/{number_of_emails}')
-        print("Sending email to:", company_name)
-        if (mode == "test"):
-            test_email(subject=subject, test_email=testing_email, coverletter=coverletter)
-        else:
-            actual_email(subject=subject, emails=emails, coverletter=coverletter)
-        emails_sent_to[company_name] = {
-            "emails": emails,
-            "website": website
-        }
-        i+=1
-        print("\n\n")
-        if i>number_of_emails:
-            break
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        try:
+            server.login(SENDER_EMAIL, PASSWORD)
+        except Exception as e:
+            print("Problem connection to your email account", e)
+            exit()
+        
+        emails_sent_to = {}
+        i = 1
+        for key, value in COMPANIES.items():
+            company_name = key
+            emails = value["emails"]
+            website = value["website"]
+            coverletter = CoverLetter(company_name, date=date, name=name)
+            time.sleep(2)
+            print(f'Email: {i}/{number_of_emails}')
+            print("Sending email to:", company_name)
+            if (mode == "test"):
+                text = test_email(sender_email=SENDER_EMAIL, subject=subject, test_email=testing_email, coverletter=coverletter, server=server)
+            else:
+                texts = actual_email(sender_email=SENDER_EMAIL, subject=subject, emails=emails, coverletter=coverletter, server=server) # returns array of texts (Message body)
+            emails_sent_to[company_name] = {
+                "emails": emails,
+                "website": website
+            }
+            i+=1
+            print("\n\n")
+            if i>number_of_emails:
+                break
+    
     if mode == "live":
         print("Finalizing...")
         emails_sent_to_json(emails_sent_to)
         update_companies_json(emails_sent_to, COMPANIES)
+        time.sleep(5)
         # clear the console
         print("\033[H\033[J")
         print("companies.json file updated")
         print("Emails sent are stored in emails_sent_to.json file")
         print("Thank you for using the program")
         print("GOOD LUCK!")
+    else:
+        print("Thank you for using the program")
+        print("\n\n")
+        print("Emails Sent to:")
+        for key, value in emails_sent_to.items():
+            print(key, ":", value["website"])
 
