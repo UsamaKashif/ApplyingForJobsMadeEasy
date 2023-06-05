@@ -1,7 +1,10 @@
 import pandas as pd
 import json
-from sendemail import send_email
+from applyForJobs.emailmessage import create_email_message
 import time
+import os
+import shutil
+
 
 def read_from_csv(csvfile):
     df = pd.read_csv(csvfile)
@@ -36,18 +39,19 @@ def emails_sent_to_json(companies):
 
 # test email function
 def test_email(sender_email, subject, test_email, coverletter, server):
-    text = send_email(sender_email=sender_email, subject=subject, receiver_email=test_email, body=coverletter)
+    text = create_email_message(sender_email=sender_email, subject=subject, receiver_email=test_email, body=coverletter)
     try:
         time.sleep(10)
         server.sendmail(sender_email, test_email, text)
         print("Test email sent to: ", test_email)
-    except:
+    except Exception as e:
+        print(e)
         print("Error sending test email to: ", test_email)
 
 # actual email function
 def actual_email(sender_email, subject, emails, coverletter, server):
     for email in emails:
-        text = send_email(sender_email=sender_email, subject=subject, receiver_email=email, body=coverletter)
+        text = create_email_message(sender_email=sender_email, subject=subject, receiver_email=email, body=coverletter)
         try:
             time.sleep(10)
             server.sendmail(sender_email, email, text)
@@ -59,55 +63,20 @@ def actual_email(sender_email, subject, emails, coverletter, server):
 def update_companies_json(emails_sent_to, COMPANIES):
     for key, value in emails_sent_to.items():
         del COMPANIES[key]
-    file_path = "companies.json"
+    file_path = "/output/companies.json"
     # Write the dictionary to a JSON file
     with open(file_path, "w") as file:
         json.dump(COMPANIES, file)
 
 
-    
+def backward_compatibality():
+    if os.path.exists("companies.json"):
+        shutil.move("companies.json", "output/companies.json")
+    if os.path.exists("emails_sent_to.json"):
+        shutil.move("emails_sent_to.json", "output/emails_sent_to.json")
 
-def mode_selection():
-    print("Email Modes: (test / live)")
-    print("Test mode will send emails to your email address")
-    print("Live mode will send emails to the companies")
-    mode = input("Select mode (test/live): ")
-    modes = ["test", "live"]
-    while mode not in modes:
-        print("Invalid mode")
-        mode = input("Select mode (test/live): ")
+    if os.path.exists("companies.csv"):
+        shutil.move("companies.csv", "input/companies.csv")
+    if os.path.exists("Software-Houses.xlsx"):
+        shutil.move("Software-Houses.xlsx", "input/Software-Houses.xlsx")
 
-    return mode
-
-def number_of_emails_to_send():
-    try:
-        number_of_emails = int(input("How many emails do you want to send? (max 50) "))
-        while number_of_emails > 50:
-            print("You can only send 50 emails at a time")
-            number_of_emails = int(input("How many emails do you want to send? (max 50) "))
-    except:
-        print("Please enter a number")
-        exit()
-    return number_of_emails
-
-def get_date():
-    date = input("Enter date for the cover letter (May 24, 2023): ")
-    while date == "":
-        print("Date cannot be empty")
-        date = input("Enter date for the cover letter (May 24, 2023): ")
-    return date
-
-
-def get_name():
-    name = input("Enter your name for the cover letter (Usama Kashif): ")
-    while name == "":
-        print("Name cannot be empty")
-        name = input("Enter your name for the cover letter (Usama Kashif): ")
-    return name
-
-def get_subject():
-    subject = input("Enter subject for the email: ")
-    while subject == "":
-        print("Subject cannot be empty")
-        subject = input("Enter subject for the email: ")
-    return subject

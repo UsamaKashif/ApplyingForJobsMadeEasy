@@ -16,15 +16,16 @@ Respecting privacy and ensuring ethical practices are of utmost importance when 
 2. Reading the JSON file and sending the emails to comapnies according to constraints set.
 
 ## Installation
-1. Clone the repository
-2. cd (Change Directory) into the directory
-3. Create the virtual environment 
+1. Install [Python](www.python.org)
+2. Clone the repository
+3. cd (Change Directory) into the directory
+4. Create the virtual environment 
     - `python -m venv env`
     - Activate environment
     - `env\Scripts\activate`
     - Deactivate environment
     - `deactivate`
-4. Install the requirements `pip install -r requirements.txt`
+5. Install the requirements `pip install -r requirements.txt`
 
 ## Why Virtual Environment?
 Virtual environment is used to create an isolated environment for the project. It is used to manage dependencies for different projects. It is used to avoid conflicts between dependencies of different projects.
@@ -36,15 +37,12 @@ Virtual environment is used to create an isolated environment for the project. I
 4. Scroll down to App passwords and click on it
 5. Select app as other
 6. Enter the name of the app as you wish and click on generate
-7. Copy the password and paste it in the PASSWORD variable in main.py file
+7. Use the generated password
 
 ## Before running the program
-1. Add your email and password in main.py file
-    - `SENDER_EMAIL`
-    - `PASSWORD`
-2. Add your coverletter in coverletter.py
-3. Add your cv in the root directory of the project
-4. Make sure the name of the cv is cv.pdf
+1. Add your coverletter in input/coverletter.py
+2. Add your cv in the input directory of the project
+3. Make sure the name of the cv is cv.pdf
 
 ## Run the program
 Make sure your virtual environment is activated
@@ -52,10 +50,7 @@ Make sure your virtual environment is activated
 `env\Scripts\activate`
 (env) will appear in the terminal if the virtual environment is activated
 1. Run the program `python main.py`
-2. Follow the instructions
-3. Program will ask to select the mode (test/live)
-    - Test mode will send email to testing email address
-    - Live mode will send email to the companies
+2. Follow the instructions on the terminal
 
 ## Note
 1. Feel free to open an issue if you find any bug or want to suggest any changes.

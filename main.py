@@ -7,30 +7,35 @@ LinkedIn: https://www.linkedin.com/in/usama-kashif/
 Website: https://usamakashif.me
 Github: https://github.com/UsamaKashif
 
+Buy Me Coffee: https://www.buymeacoffee.com/usamaKashif
+
 Don't forget to star the repo if you like it.
 
 '''
 
-import email, smtplib, ssl
-from helperfunctions import read_from_csv, read_from_xlsx, actual_email,emails_sent_to_json,test_email, update_companies_json, mode_selection, number_of_emails_to_send, get_name, get_subject, get_date
-from coverletter import CoverLetter
+from applyForJobs.helperfunctions import read_from_csv, read_from_xlsx, actual_email,emails_sent_to_json,test_email, update_companies_json, backward_compatibality
+from applyForJobs.menu import display_menu
+from applyForJobs.coverletter import CoverLetter
+from applyForJobs.auth import authentication
+import smtplib, ssl
 import time
 import json
+import os
 
 
 
 def generate_companies_json ():
     try:
     # load companies from json file if it exists
-        with open("companies.json", "r") as file:
+        with open("output/companies.json", "r") as file:
             COMPANIES = json.load(file)
     except:
         print("Generating companies json file...")
         # loading the companies from csv files
-        companies = read_from_csv("companies.csv")
+        companies = read_from_csv("input/companies.csv")
 
         # loading the software houses from excel files
-        software_houses = read_from_xlsx("Software-Houses.xlsx")
+        software_houses = read_from_xlsx("input/Software-Houses.xlsx")
         COMPANIES = {}
         # creating a dictionary of companies
         for index, row in companies.iterrows():
@@ -55,56 +60,46 @@ def generate_companies_json ():
                 "website": row["website"].strip()
             }
 
-        file_path = "companies.json"
+        file_path = "output/companies.json"
 
         # Write the dictionary to a JSON file
-        with open(file_path, "w") as file:
-            json.dump(COMPANIES, file)
+        try:
+            with open(file_path, "w") as file:
+                json.dump(COMPANIES, file)
+        except:
+            # create the output folder if it doesn't exist
+            if not os.path.exists("output"):
+                os.makedirs("output")
+            with open(file_path, "w") as file:
+                json.dump(COMPANIES, file)
+
     return COMPANIES
 
 
-# EAMIL SETUP
-SENDER_EMAIL = "<youreamil@gmail.com>"
-PASSWORD = "<yourpassword>"
 
+backward_compatibality()
+COMPANIES=generate_companies_json()
 
-if __name__ == "__main__":
-    if SENDER_EMAIL == "<youreamil@gmail.com>" or PASSWORD == "<yourpassword>":
-        print("Please change the SENDER_EMAIL and PASSWORD in main.py file")
-        exit()
-    COMPANIES=generate_companies_json()
-    print("\033[H\033[J")
+SENDER_EMAIL, PASSWORD, EMAIL_PROVIDER = authentication()
 
-    print("Welcome to the email sender program")
-    
-    mode = mode_selection()
-    
-    # clear the console
-    print("\033[H\033[J")
-    print("You have selected", mode, "mode")
-    if mode == "test":
-        testing_email = input("Enter test email address: ")
-    
-    
-    number_of_emails = number_of_emails_to_send()
-    # clear the console
-    print("\033[H\033[J")
-    
-    date = get_date()
-    name = get_name()
-    subject = get_subject()
+# clear the console
+print("\033[H\033[J")
 
-    # clear the console
-    print("\033[H\033[J")
-
+try:
     context = ssl.create_default_context()
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+    with smtplib.SMTP_SSL(EMAIL_PROVIDER, 465, context=context) as server:
         try:
+            print("Connecting to your email account...")
             server.login(SENDER_EMAIL, PASSWORD)
         except Exception as e:
             print("Problem connection to your email account", e)
-            exit()
-        
+            exit()   
+        time.sleep(2)
+        # clear the console
+        print("\033[H\033[J")
+
+
+        mode, number_of_emails, testing_email, date, name, subject = display_menu()
         emails_sent_to = {}
         i = 1
         for key, value in COMPANIES.items():
@@ -127,22 +122,24 @@ if __name__ == "__main__":
             print("\n\n")
             if i>number_of_emails:
                 break
-    
-    if mode == "live":
-        print("Finalizing...")
-        emails_sent_to_json(emails_sent_to)
-        update_companies_json(emails_sent_to, COMPANIES)
-        time.sleep(5)
-        # clear the console
-        print("\033[H\033[J")
-        print("companies.json file updated")
-        print("Emails sent are stored in emails_sent_to.json file")
-        print("Thank you for using the program")
-        print("GOOD LUCK!")
-    else:
-        print("Thank you for using the program")
-        print("\n\n")
-        print("Emails Sent to:")
-        for key, value in emails_sent_to.items():
-            print(key, ":", value["website"])
+except Exception as e:
+    print("Problem connection to your email account", e)
+
+if mode == "live":
+    print("Finalizing...")
+    emails_sent_to_json(emails_sent_to)
+    update_companies_json(emails_sent_to, COMPANIES)
+    time.sleep(5)
+    # clear the console
+    print("\033[H\033[J")
+    print("companies.json file updated")
+    print("Emails sent are stored in emails_sent_to.json file")
+    print("Thank you for using the program")
+    print("GOOD LUCK!")
+else:
+    print("Thank you for using the program")
+    print("\n\n")
+    print("Emails Sent to:")
+    for key, value in emails_sent_to.items():
+        print(key, ":", value["website"])
 
