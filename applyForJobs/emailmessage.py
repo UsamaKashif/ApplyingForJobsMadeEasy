@@ -5,18 +5,9 @@ from email.mime.text import MIMEText
 import re
 
 
-regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'  
-def check_email_valid(email):   
-    if(re.search(regex,email)):
-        return True  
-    else:
-        return False
 
 # if your cv name is not c.pdf then change the filename parameter
-def send_email(sender_email, subject, receiver_email, body, filename="cv.pdf"):
-    if not check_email_valid(receiver_email):
-        print("Invalid sender email:", receiver_email)
-        return
+def create_email_message(sender_email, subject, receiver_email, body, filename="cv.pdf"):
     try:
         # Create a multipart message and set headers
         message = MIMEMultipart()
