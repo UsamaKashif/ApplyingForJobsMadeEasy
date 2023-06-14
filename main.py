@@ -122,24 +122,25 @@ try:
             print("\n\n")
             if i>number_of_emails:
                 break
+    if mode == "live":
+        print("Finalizing...")
+        emails_sent_to_json(emails_sent_to)
+        update_companies_json(emails_sent_to, COMPANIES)
+        time.sleep(5)
+        # clear the console
+        print("\033[H\033[J")
+        print("companies.json file updated")
+        print("Emails sent are stored in emails_sent_to.json file")
+        print("Thank you for using the program")
+        print("GOOD LUCK!")
+    else:
+        print("Thank you for using the program")
+        print("\n\n")
+        print("Emails Sent to:")
+        for key, value in emails_sent_to.items():
+            print(key, ":", value["website"])
 except Exception as e:
     print("Problem connection to your email account", e)
 
-if mode == "live":
-    print("Finalizing...")
-    emails_sent_to_json(emails_sent_to)
-    update_companies_json(emails_sent_to, COMPANIES)
-    time.sleep(5)
-    # clear the console
-    print("\033[H\033[J")
-    print("companies.json file updated")
-    print("Emails sent are stored in emails_sent_to.json file")
-    print("Thank you for using the program")
-    print("GOOD LUCK!")
-else:
-    print("Thank you for using the program")
-    print("\n\n")
-    print("Emails Sent to:")
-    for key, value in emails_sent_to.items():
-        print(key, ":", value["website"])
+
 

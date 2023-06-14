@@ -24,7 +24,7 @@ def read_from_xlsx(xlfile):
 
 # Storing the emails sent to json file
 def emails_sent_to_json(companies):
-    file_path = "emails_sent_to.json"
+    file_path = "output/emails_sent_to.json"
     # check if already existes then update the json file else create new
     try:
         with open(file_path, "r") as file:
@@ -63,7 +63,7 @@ def actual_email(sender_email, subject, emails, coverletter, server):
 def update_companies_json(emails_sent_to, COMPANIES):
     for key, value in emails_sent_to.items():
         del COMPANIES[key]
-    file_path = "/output/companies.json"
+    file_path = "output/companies.json"
     # Write the dictionary to a JSON file
     with open(file_path, "w") as file:
         json.dump(COMPANIES, file)

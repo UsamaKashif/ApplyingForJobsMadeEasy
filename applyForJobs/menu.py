@@ -94,6 +94,8 @@ def display_menu():
     print("You have selected", mode, "mode")
     if mode == "test":
         testing_email = input("Enter test email address: ")
+    else:
+        testing_email = None
     
     
     number_of_emails = number_of_emails_to_send()
