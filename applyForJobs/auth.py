@@ -53,7 +53,7 @@ def authentication():
             auth = {
                 "email": SENDER_EMAIL,
                 "password": PASSWORD,
-                "email_provider": email_provider
+                "email_provider": EMAIL_PROVIDER
             }
             # Write the dictionary to a JSON file
             with open("output/auth.json", "w") as file:
